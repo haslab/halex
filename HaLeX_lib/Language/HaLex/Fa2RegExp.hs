@@ -77,7 +77,7 @@ toRegExp2' (x:xs) = case x of
 
 
 
-regular :: Num st
+regular :: (Eq st, Num st)
         => (st -> sy -> st)
         -> [sy]
         -> st
@@ -101,7 +101,7 @@ dfa2RegExp :: Eq sy
 dfa2RegExp dfa@(Dfa v q s z delta) =
           limit simplifyRegExp (applyD delta v s z (sizeDfa dfa))
 
-applyD :: Num st
+applyD :: (Eq st, Num st)
        => (st -> sy -> st)
        -> [sy]
        -> st
