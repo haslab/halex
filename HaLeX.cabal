@@ -1,5 +1,5 @@
 name:                HaLeX
-version:             1.2
+version:             1.2.1
 synopsis:            HaLeX enables modelling, manipulation and animation of regular languages
 description:         This library was developed in the context of a programming methodology course for
                      undergraduate students, and as a consequence, it was defined mainly for educational purposes.
@@ -17,7 +17,7 @@ homepage:            http://www.di.uminho.pt/~jas/Research/HaLeX/HaLeX.html
 tested-with:         GHC==6.8.2
 Cabal-Version:       >= 1.2
 build-type:          Simple
-data-files:          README, INSTALL, paper/HaLeX.ps, example/README, example/real_dfa.ps, example/real_ndfa.ps
+data-files:          README.md, INSTALL, paper/HaLeX.ps, example/README, example/real_dfa.ps, example/real_ndfa.ps
 extra-source-files:  scripts/Make_Animation, scripts/faAnim.lefty, example/real, example/real_dfa.hs,
                      example/real_ndfa.hs, example/GenMDfa.hs
 Library
