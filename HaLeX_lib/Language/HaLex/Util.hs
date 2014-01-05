@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Language.HaLex.Edfa
--- Copyright   :  (c) Joãoo Saraiva 2001,2002,2003,2004,2005
+-- Copyright   :  (c) Jo√£oo Saraiva 2001,2002,2003,2004,2005
 -- License     :  LGPL
 --
 -- Maintainer  :  jas@di.uminho.pt
