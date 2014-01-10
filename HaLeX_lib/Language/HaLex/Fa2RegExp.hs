@@ -111,5 +111,3 @@ applyD :: (Eq st, Num st)
 
 applyD d v _ []     _   = Epsilon
 applyD d v i (z:zs) k   = (regular d v i z k) `Or` (applyD d v i zs k)
-
-

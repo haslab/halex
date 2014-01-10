@@ -332,7 +332,7 @@ One Example
 \begin{code}
 
 -- er: a* b a
--- Conta o numero de ocorrência dos caracter a
+-- Conta o numero de ocorrÃªncia dos caracter a
 
 ex3 :: Dfa (State Integer) Char Char
 ex3 = Dfa ['a','b']

@@ -7,7 +7,7 @@
 --      Language Processing (with a functional flavour)
 --
 --
--- copyright Jo„o Saraiva
+-- copyright Jo√£o Saraiva
 --           Department of Computer Science,
 --           University of Minho,
 --           Braga, Portugal
