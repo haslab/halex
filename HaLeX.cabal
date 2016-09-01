@@ -40,3 +40,7 @@ Executable halex
 
            ghc-options:          -Wall
            ghc-prof-options:    -prof -auto-all
+
+source-repository head
+        type:     git
+        location: git://github.com/haslab/halex.git
