@@ -21,6 +21,7 @@
 module Language.HaLex.RegExpParser ( parseRegExp
                                    ) where
 
+import Prelude hiding ((<$>), (<*>))
 import Data.Char
 import Language.HaLex.Parser
 import Language.HaLex.RegExp
