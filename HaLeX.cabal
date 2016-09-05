@@ -15,7 +15,7 @@ maintainer:          João Saraiva <jas@di.uminho.pt>
 homepage:            http://www.di.uminho.pt/~jas/Research/HaLeX/HaLeX.html
 
 tested-with:         GHC==6.8.2
-Cabal-Version:       >= 1.2
+Cabal-Version:       >= 1.6
 build-type:          Simple
 data-files:          README.md, INSTALL, paper/HaLeX.ps, example/README, example/real_dfa.ps, example/real_ndfa.ps
 extra-source-files:  scripts/Make_Animation, scripts/faAnim.lefty, example/real, example/real_dfa.hs,
@@ -25,7 +25,6 @@ Library
         extensions:             FlexibleContexts, FlexibleInstances, MultiParamTypeClasses
 
         ghc-options:          -Wall
-        ghc-prof-options:    -prof -auto-all
 
         hs-source-dirs:         HaLeX_lib
         Exposed-modules:        Language.HaLex.RegExpAsDiGraph, Language.HaLex.Ndfa, Language.HaLex.Dfa2MDfa, Language.HaLex.Minimize,
@@ -39,7 +38,6 @@ Executable halex
            hs-source-dirs:      HaLeX_tool, HaLeX_lib
 
            ghc-options:          -Wall
-           ghc-prof-options:    -prof -auto-all
 
 source-repository head
         type:     git
