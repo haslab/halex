@@ -29,6 +29,7 @@ module Language.HaLex.Dfa (
               , transitionsFromTo
               , destinationsFrom
               , transitionTableDfa
+              , transitionTableDfa'
               , reachedStatesFrom
               -- * Printing
               , beautifyDfa
@@ -217,6 +218,24 @@ transitionTableDfa (Dfa v q s z delta) = sort [ ( aq , av , delta aq av)
                                               | aq <- q
                                               , av <- v
                                               ]
+
+
+-- | Produce the transition table of a given 'Dfa'. 
+--   Given a 'Dfa', it returns a list of triples of the form
+-- @
+--                 (Origin,[Destination])
+-- @
+-- defining all the transitions of the 'Dfa'.
+--
+
+transitionTableDfa' :: (Ord st, Ord sy) 
+                    => Dfa st sy          -- ^ Automaton
+                    -> [(st,[st])]        -- ^ Transition table
+
+transitionTableDfa' (Dfa v q s z delta) = sort [ ( aq , map (delta aq) v )  
+                                               | aq <- q 
+                                               ]
+
 
 
 -- | Reconstruct a 'Dfa' from a transition table.

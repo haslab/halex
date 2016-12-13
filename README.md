@@ -15,7 +15,7 @@ Copyright João Saraiva
           jas@di.uminho.pt
 
 
-Version: 1.2.2 (August, 2016)
+Version: 1.2.3 (December, 2016)
 
 
 1- What is HaleX

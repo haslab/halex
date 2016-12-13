@@ -1,5 +1,5 @@
 name:                HaLeX
-version:             1.2.2
+version:             1.2.3
 synopsis:            HaLeX enables modelling, manipulation and animation of regular languages
 description:         This library was developed in the context of a programming methodology course for
                      undergraduate students, and as a consequence, it was defined mainly for educational purposes.

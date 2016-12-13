@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Language.HaLex.Ndfa
--- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005
+-- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005, 2016
 -- License     :  LGPL
 --
--- Maintainer  :  jas@di.uminho.pt
+-- Maintainer  :  saraiva@di.uminho.pt
 -- Stability   :  provisional
 -- Portability :  portable
 --
@@ -39,6 +39,7 @@ module Language.HaLex.Ndfa (
              , ndfadeadstates
              -- * Properties of States
              , ndfaIsStDead
+             , ndfaIsSyncState
              , ndfanumberIncomingArrows
              , ndfanumberOutgoingArrows
              ) where
@@ -321,12 +322,25 @@ ndfaIsStDead d v z st = ndfareachedStatesFrom d v st `intersect` z == []
 -- | Checks whether a 'Ndfa' state is a sync state or not
 --
 
-
-isSyncState :: Ord st => st -> [sy] -> [st] -> (st -> Maybe sy -> [st]) -> Bool
-isSyncState st vs z d = (not (st `elem` z)) && (and qs)
+{-
+ndfaIsSyncState :: Ord st => st -> [sy] -> [st] -> (st -> Maybe sy -> [st]) -> Bool
+ndfaIsSyncState st vs z d = (not (st `elem` z)) && (and qs)
   where qs = [ [st] == (d st (Just v))
                && (([st] == d st Nothing) || ([] == d st Nothing))
              | v <- vs
+             ]
+-}
+
+ndfaIsSyncState :: Ord st
+                => (st -> Maybe sy -> [st])     -- ^ Transition Function
+		-> [sy]                         -- ^ Vocabulary
+		-> [st]                         -- ^ Set of Final States
+		-> st                           -- ^ State
+		-> Bool
+ndfaIsSyncState d vs z st = (not (st `elem` z)) && (and qs)
+  where qs = [ [st] == (d st (Just v)) 
+               && (([st] == d st Nothing) || ([] == d st Nothing))
+             | v <- vs 
              ]
 
 
