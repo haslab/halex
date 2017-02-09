@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Language.HaLex.RegExp
--- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005
+-- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005, 2016
 -- License     :  LGPL
 -- 
 -- Maintainer  :  jas@di.uminho.pt
@@ -44,21 +44,23 @@ data RegExp sy  = Empty                              -- ^ Empty Language
                 | Star      (RegExp sy)              -- ^ Repetition, possibly zero time
                 | OneOrMore (RegExp sy)              -- ^ One or more times (extended RegExp)
                 | Optional  (RegExp sy)              -- ^ Optional (extended RegExp)
+                | RESet     [sy]                     -- ^ Set (extended RegExp)
    deriving (Read, Eq)
    
 -- | Catamorphism induced by the 'RegExp' inductive data type
 
 cataRegExp :: ( re 
               , re
-              , re -> re -> re
-              , re -> re
-              , sy -> re
-              , re -> re -> re
-              , re -> re
-              , re -> re
+              , re   -> re -> re
+              , re   -> re
+              , sy   -> re
+              , re   -> re -> re
+              , re   -> re
+              , re   -> re
+              , [sy] -> re
               ) -> RegExp sy -> re
 
-cataRegExp (empty,epsilon,or,star,lit,th,one,opt) = cata
+cataRegExp (empty,epsilon,or,star,lit,th,one,opt,set) = cata
  where cata Empty          = empty 
        cata Epsilon        = epsilon
        cata (Or er1 er2)   = or (cata er1) (cata er2)
@@ -67,6 +69,7 @@ cataRegExp (empty,epsilon,or,star,lit,th,one,opt) = cata
        cata (Then er1 er2) = th (cata er1) (cata er2)
        cata (OneOrMore er) = one (cata er)
        cata (Optional er)  = opt (cata er)
+       cata (RESet st)     = set st
 
 -----------------------------------------------------------------------------
 -- * Matching
@@ -131,7 +134,7 @@ frontSplits s = [ splitAt n s | n <- [ 1 .. length s ] ]
 
 sizeRegExp :: RegExp sy      -- ^ Regular Expression
            -> Int            -- ^ Size
-sizeRegExp = cataRegExp (0,0,(+),id,\x -> 1,(+),id,id)
+sizeRegExp = cataRegExp (0,0,(+),id,\x -> 1,(+),id,id,length)
 
 
 -----------------------------------------------------------------------------
@@ -154,33 +157,36 @@ showRE = cataRegExp  ("{}"
                      , \ l r -> "(" ++ l ++ r ++ ")"
                      , \ er  -> "(" ++ er ++ ")+"
                      , \ er  -> "(" ++ er ++ ")?"
+                     , \ set -> show set
                      )
 
 -- | Pretty print of regular expressions.
 
 instance Show sy => Show (RegExp sy) where
           showsPrec _ Empty             = showString "{}"
- 	  showsPrec _ Epsilon           = showChar '@'
- 	  showsPrec _ (Literal c)       = showsPrec 0 c
+          showsPrec _ Epsilon           = showChar '@'
+          showsPrec _ (Literal c)       = showsPrec 0 c
 {-                | isSymbol c            = showChar '\''
                                         . showChar c
                                         . showChar '\''
                 | otherwise             = showChar c
 -}
-   	  showsPrec n (Star e)          = showsPrec 10 e . showChar '*'
- 	  showsPrec n (OneOrMore e)     = showParen (n == 4)
+          showsPrec n (Star e)          = showsPrec 10 e . showChar '*'
+          showsPrec n (OneOrMore e)     = showParen (n == 4)
                                         $ showsPrec 10 e
                                         . showChar '+'
- 	  showsPrec _ (Optional e)      = showsPrec 10 e
+          showsPrec _ (Optional e)      = showsPrec 10 e
                                         . showChar '?'
- 	  showsPrec n (e1 `Or` e2)      = showParen (n /= 0 && n /= 4)
+          showsPrec n (e1 `Or` e2)      = showParen (n /= 0 && n /= 4)
                                         $ showsPrec 4 e1
                                         . showChar '|'
                                         . showsPrec 4 e2
-	  showsPrec n (e1 `Then` e2)    = showParen (n /= 0 && n /= 6)
+          showsPrec n (e1 `Then` e2)    = showParen (n /= 0 && n /= 6)
                                         $ showsPrec 6 e1
                                         . showChar ' '
                                         . showsPrec 6 e2
+          showsPrec _ (RESet set)       = showList set
+ 
  
 isSymbol x = x `elem` "|? "
 
@@ -196,7 +202,7 @@ simplifyRegExp (Literal x)  = Literal x
 
 simplifyRegExp (Star x)     = case x' of                                -- Algebraic Rules:
                                Epsilon      -> Epsilon                  -- @*       = @
-  		               Empty        -> Epsilon                  -- {}*      = @
+                               Empty        -> Epsilon                  -- {}*      = @
                                Or Epsilon a -> Star (simplifyRegExp a)  -- (a | @)* = a*
                                Or a Epsilon -> Star (simplifyRegExp a)  -- (@ | a)* = a*
                                _            -> Star x'
@@ -240,13 +246,16 @@ simplifyRegExp (OneOrMore x) = case x' of
 
 simplifyRegExp (Optional x) = Optional (simplifyRegExp x)
 
+simplifyRegExp (RESet set) = RESet set
+
+
 
 -----------------------------------------------------------------------------
 -- * Normalization
 
 -- | Rewrite extended regular expressions to
 --   plain regular expression. This means that the 'OneOrMore' 
---   and 'Optional' constructors are normalized away.
+--   'Optional' and 'RESet' constructors are normalized away.
 
 extREtoRE :: RegExp sy -> RegExp sy
 extREtoRE  = cataRegExp ( Empty
@@ -257,6 +266,7 @@ extREtoRE  = cataRegExp ( Empty
                         , \ l r -> Then l r 
                         , \ er  -> Then er (Star er)
                         , \ er  -> Or Epsilon er
+                        , \ set -> foldr1 Or (map Literal set)
                         ) 
 
 -----------------------------------------------------------------------------

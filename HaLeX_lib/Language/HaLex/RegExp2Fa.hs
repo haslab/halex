@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Language.HaLex.RegExp2Fa
--- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005
+-- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005,2016
 -- License     :  LGPL
 --
 -- Maintainer  :  jas@di.uminho.pt
@@ -111,6 +111,21 @@ regExp2Ndfa' (Star p) n = ( Ndfa v' q' s' z' delta' , np+1 )
 
                 dd' q Nothing = sp `union` z'
                 dd' _ _ = []
+
+regExp2Ndfa' (RESet set) n = (Ndfa set [ss,zs] [ss] [zs] delta , n+2)
+  where ss = n
+        zs = n+1 
+        delta q (Just v) | q == ss && (v `elem` set) = [zs]
+        delta _ _ = []
+
+
+regExp2Ndfa' (OneOrMore re) n = regExp2Ndfa' re' n
+  where re' = re ` Then` (Star re)
+
+regExp2Ndfa' (Optional re) n = regExp2Ndfa' re' n
+  where re' = Epsilon `Or` re
+
+
 
 -- | Compute a 'Dfa' from a 'RegExp'.
 --   (via the intermediate 'Ndfa')

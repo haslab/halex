@@ -17,6 +17,8 @@
 
 module Language.HaLex.Parser where
 
+import Prelude hiding ((<$>), (<*>))
+
 infixl 3 <|> ; infixl 4 <*>
 
 
@@ -65,5 +67,12 @@ succeed r xs = [(r,xs)]
 (f <$> p) xs = [(f y, ys) | (y,ys) <- p xs ]
 
 
+--
+--  More combinators
+--
 
-
+oneOrMore  :: Parser s a -> Parser s [a]
+oneOrMore p =   f <$>  p <*> oneOrMore p
+           <|>  g <$>  p
+   where f a as = a:as
+         g a    = [a]
