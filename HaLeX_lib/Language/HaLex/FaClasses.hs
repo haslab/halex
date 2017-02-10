@@ -21,6 +21,7 @@ module Language.HaLex.FaClasses where
 import Language.HaLex.Dfa
 import Language.HaLex.Ndfa
 import Language.HaLex.FaOperations
+import Language.HaLex.Sentences
 import Language.HaLex.Equivalence
 import Language.HaLex.Minimize
 import Language.HaLex.FaAsDiGraph
@@ -35,6 +36,7 @@ class Fa fa st sy where
   minimize   :: fa st sy -> Dfa [[st]] sy
   reverseFa  :: fa st sy -> Ndfa st sy
   deadstates :: fa st sy -> [st]
+  sentences  :: fa st sy -> [[sy]]
   toHaskell' :: fa st sy -> String -> IO ()
   toGraph    :: fa st sy -> String -> String
   toGraphIO  :: fa st sy -> String -> IO()
@@ -55,10 +57,12 @@ instance (Show st , Show sy , Ord st , Ord sy) => Fa Dfa st sy where
   minimize   = minimizeDfa
   reverseFa  = reverseDfa
   deadstates = dfadeadstates
+  sentences  = sentencesDfa
   toHaskell' = toHaskell
   toGraph    = dfa2graphviz
   toGraphIO  = dfa2graphviz2file
 
+  
   unionFa    = unionDfa
   starFa     = starDfa
   concatFa   = concatDfa
@@ -73,6 +77,7 @@ instance (Show st , Show sy , Ord st , Ord sy) => Fa Ndfa st sy where
   minimize   = minimizeNdfa
   reverseFa  = reverseNdfa
   deadstates = ndfadeadstates
+  sentences  = sentencesNdfa
   toHaskell' = toHaskell
   toGraph    = ndfa2graphviz
   toGraphIO  = ndfa2graphviz2file

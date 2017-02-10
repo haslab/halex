@@ -124,13 +124,14 @@ minimizeExp :: Ord st
             => Dfa st sy                      -- ^ Original 'Dfa'
             -> Dfa [st] sy                    -- ^ Equivalent Minimized 'Dfa'
 
-minimizeExp (Dfa t lst si lsf d) = Dfa t l (head (filter (\x->elem si x) l))
-                                        (filter (\x->intersect x lsf /= []) l) ndelta
-                                where (a,b)=partition f lst
-			              f x = elem x lsf
-				      l = (minaux lst d t) [a,b]
-				      ndelta st s | elem st l = rfind (d (head st) s) l
-					          | otherwise = []
+minimizeExp (Dfa t lst si lsf d) =
+   Dfa t l (head (filter (\x->elem si x) l))
+           (filter (\x->intersect x lsf /= []) l) ndelta
+      where (a,b)=partition f lst
+            f x = elem x lsf
+            l = (minaux lst d t) [a,b]
+            ndelta st s | elem st l = rfind (d (head st) s) l
+                        | otherwise = []
 
 rfind :: Eq a => a -> [[a]] -> [a]
 rfind _ []=[]
@@ -140,18 +141,19 @@ rfind x (h:t)| elem x h  = h
 minaux :: (Ord a) => [a] -> (a -> b -> a) -> [b] -> [[a]] -> [[a]]
 minaux lst d simb p | p == p' = p
                     | otherwise = minaux lst d simb p'
-		    where p' =concatMap (partes lst d simb p []) p
+     where p' =concatMap (partes lst d simb p []) p
 
 partes :: Eq a => [a] -> (a -> b -> a) -> [b] -> [[a]] -> [a] -> [a] -> [[a]]
 partes _ _ _ _ _ []  =[]
-partes _ _ _ _ ac [h] | elem h ac = []
-                      | otherwise = [[h]]
-partes lst d simb p ac (h:hs) |(elem h ac) = partes lst d simb p ac hs
-                              |otherwise = ([h]++r):(partes lst d simb p  (ac++r) hs)
-			      where r = raux hs
-			            raux []=[]
-		                    raux (x:xs) | (comparaDelta lst d simb p h x) = x:(raux xs)
-			                        | otherwise = raux xs
+partes _ _ _ _ ac [h] |  elem h ac = []
+                      |  otherwise = [[h]]
+partes lst d simb p ac (h:hs)
+                      |  (elem h ac) = partes lst d simb p ac hs
+                      |  otherwise   = ([h]++r):(partes lst d simb p  (ac++r) hs)
+               where r = raux hs
+                     raux [] = []
+                     raux (x:xs) | (comparaDelta lst d simb p h x) = x:(raux xs)
+                                 | otherwise = raux xs
 
 
 mesmoGrupo :: Eq a => [a] -> [[a]] -> a -> a -> Bool
@@ -167,7 +169,7 @@ comparaDelta lst d simb p s t= and (map (comparaDeltaSimb lst d p s t) simb)
 comparaDeltaSimb :: Eq a => [a] -> (a -> b -> a) -> [[a]] -> a -> a -> b -> Bool
 comparaDeltaSimb lst d p s t v = mesmoGrupo lst p s' t'
                                  where s' = d s v
-				       t' = d t v
+                                       t' = d t v
 
 
 -----------------------------------------------------------------------------

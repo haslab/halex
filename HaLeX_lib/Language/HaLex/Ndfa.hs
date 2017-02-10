@@ -333,10 +333,10 @@ ndfaIsSyncState st vs z d = (not (st `elem` z)) && (and qs)
 
 ndfaIsSyncState :: Ord st
                 => (st -> Maybe sy -> [st])     -- ^ Transition Function
-		-> [sy]                         -- ^ Vocabulary
-		-> [st]                         -- ^ Set of Final States
-		-> st                           -- ^ State
-		-> Bool
+                -> [sy]                         -- ^ Vocabulary
+                -> [st]                         -- ^ Set of Final States
+                -> st                           -- ^ State
+                -> Bool
 ndfaIsSyncState d vs z st = (not (st `elem` z)) && (and qs)
   where qs = [ [st] == (d st (Just v)) 
                && (([st] == d st Nothing) || ([] == d st Nothing))

@@ -72,9 +72,9 @@ sentencesDfa' ::  (Ord st, Ord sy) => Dfa st sy -> [[sy]]
 sentencesDfa' d = sentences d tt tt
     where tt = transitionTableDfa d
 
---  | This function generates all paths (corresponding to valid sentences
---    of the language) that cover all transitions of the finite automaton. 
---    The transition table serves two purposes when calling this function:
+-- | This function generates all paths (corresponding to valid sentences
+--   of the language) that cover all transitions of the finite automaton. 
+--   The transition table serves two purposes when calling this function:
 --       - to know the transitions of the automaton
 --       - to serve has the state recording all transitions not used (yet)
 --         (in the begining this list should be the full transition
@@ -133,8 +133,8 @@ onePath :: (Eq sy, Eq st)
         -> ([(st, sy, st)] , [sy])  
 
 onePath tt cbu sys ft st
- | ft == st   = (cbu, sys)
- | otherwise  = onePath tt (delete k cbu) (symbol:sys) before_f st
+     | ft == st   = (cbu, sys)
+     | otherwise  = onePath tt (delete k cbu) (symbol:sys) before_f st
                 -- at each recursive call it performs a backwards step
                 -- the new final state is the origin of the chosen transition
                 -- (where the previous final state (ft) is the destination).
