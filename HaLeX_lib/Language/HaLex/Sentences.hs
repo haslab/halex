@@ -8,12 +8,16 @@
 -- Stability   :  provisional
 -- Portability :  portable
 --
--- Generation of sentences of the (regular) languages defined via
+-- Generation of sentences for (regular) languages defined via
 --   Regular Expressions and Finite Autumata
 --
 -----------------------------------------------------------------------------
 
-module Language.HaLex.Sentences where
+module Language.HaLex.Sentences ( sentencesRegExp
+                                , sentencesNdfa
+                                , sentencesDfa
+                                , onePathDfa
+                                ) where
 
 import Language.HaLex.Dfa
 import Language.HaLex.Ndfa
@@ -49,8 +53,8 @@ sentencesNdfa =  sentencesDfa . minimizeDfa . ndfa2dfa
 --   in an accepting state, which include all transitions/edges of the
 --   automaton.
 --
---   This function does not computes the smallest set of paths, as
---   computed by the "Chinese Postman Problem"
+--   This function does not computes the smallest set (of paths/sentebces),
+--   as computed by the "Chinese Postman Problem"
 --
 --   Function written by MSc student José Nuno Macedo (72424)
 --   in the context of the 2016/17 edition of the course 
@@ -60,40 +64,52 @@ sentencesNdfa =  sentencesDfa . minimizeDfa . ndfa2dfa
 sentencesDfa ::  (Ord st, Eq sy, Ord sy) => Dfa st sy -> [[sy]]
 sentencesDfa = nub . sentencesDfa'
 
--- | 
---    dado um automato finito, calcular caminhos de modo a cobrir todos os edges - produz resultados repetidos, devido ao resultado de transitionTableDfa
+-- | This auxiliar function uses the transition table computed from the
+--   given automaton to generate a finite set of sentences the the
+--   language.
 
 sentencesDfa' ::  (Ord st, Ord sy) => Dfa st sy -> [[sy]]
 sentencesDfa' d = sentences d tt tt
- where tt = transitionTableDfa d
+    where tt = transitionTableDfa d
 
---  | 
--- 
--- 
+--  | This function generates all paths (corresponding to valid sentences
+--    of the language) that cover all transitions of the finite automaton. 
+--    The transition table serves two purposes when calling this function:
+--       - to know the transitions of the automaton
+--       - to serve has the state recording all transitions not used (yet)
+--         (in the begining this list should be the full transition
+--          table of the dfa, and the function terminates when this
+--          list is empty: no more tarnsitions need to be covered)
 
 sentences ::  (Ord st, Ord sy)
           => Dfa st sy               -- ^ Automaton
-	  -> [(st, sy, st)]          -- ^ Dfa's Transition Table
-	  -> [(st, sy, st)]          -- ^ Table with transitions to be used
-	  -> [[sy]]                  -- ^ List of sentences
+          -> [(st, sy, st)]          -- ^ Dfa's Transition Table
+          -> [(st, sy, st)]          -- ^ Table with transitions to be used
+          -> [[sy]]                  -- ^ List of sentences
 
 sentences     _               _ []      = []
 sentences d@(Dfa _ _ s z _) tt mustUse = sys ++ rec_call
-          --uma ida do inicio até cada um dos fins, mais chamada recursiva
- where (newMustUses, sys) = unzip [onePath tt mustUse [] fs' s | fs' <- z ]
-                        -- calcular um caminho do inicio até cada um dos finais,
-			-- tentando passar por o máximo de mustUse
+ where
+       -- First, we compute all paths from the start state to each state
+       -- in the set of final sates.  Each path produces the list of
+       -- transitions that need to be used and the sentence formed by
+       -- that path
+       
+       (newMustUses, sys) = unzip [onePath tt mustUse [] fs' s | fs' <- z ]
+
+       -- The lists of transitions to be used (produced by each path)
+       -- is merged into a sinle list of transitions still to be used
 
        newMustUse = foldr1 intersect newMustUses
-                        -- descobrir quantos edges faltam cobrir
 
-       rec_call = if newMustUse == mustUse
+       -- Recursive call with the new list os transitions still to be used.
+       --   note that if the new transitions (to be used) are the same to the
+       --   received ones, no progress was made. Thus no (non-finishing)
+       --   recursive call is performed.
+
+       rec_call = if   newMustUse == mustUse
                   then []
-		  else (sentences d tt newMustUse)
-                        -- cortar chamada recursiva se não se consegue
-			-- progresso (impede ciclos infinitos que só
-			-- adicionam lixo)
-
+                  else (sentences d tt newMustUse)
 
 
 -- | This function computes one path from a given start state to a given final
@@ -110,20 +126,20 @@ sentences d@(Dfa _ _ s z _) tt mustUse = sys ++ rec_call
 
 onePath :: (Eq sy, Eq st)
         => [(st, sy, st)]           -- ^ Dfa's Transition Table
-	-> [(st, sy, st)]           -- ^ Table with transitions to be used
-	-> [sy]                     -- ^ list of labels (used so far) 
-	-> st                       -- ^ final state
-	-> st                       -- ^ start state
+        -> [(st, sy, st)]           -- ^ Table with transitions to be used
+        -> [sy]                     -- ^ list of labels (used so far) 
+        -> st                       -- ^ final state
+        -> st                       -- ^ start state
         -> ([(st, sy, st)] , [sy])  
 
 onePath tt cbu sys ft st
  | ft == st   = (cbu, sys)
  | otherwise  = onePath tt (delete k cbu) (symbol:sys) before_f st
                 -- at each recursive call it performs a backwards step
-		-- the new final state is the origin of the chosen transition
-		-- (where the previous final state (ft) is the destination).
-		-- The transition used is deleted from can be used.
-		-- The initial state (st) and trans. table (tt) do not change.
+                -- the new final state is the origin of the chosen transition
+                -- (where the previous final state (ft) is the destination).
+                -- The transition used is deleted from can be used.
+                -- The initial state (st) and trans. table (tt) do not change.
  where    
        -- computing the lists of transitions with the final state (ft)
        -- as destination: both for the trans. table and the can be used
@@ -137,6 +153,9 @@ onePath tt cbu sys ft st
 
        k@(before_f, symbol, _) = head $ priorityList ++ p2
 
+
+-- | This function computes one sentence of the language defined by
+--   a deterministic fininte automaton
 
 onePathDfa  ::  (Ord st, Ord sy) => Dfa st sy  -> [sy]
 onePathDfa dfa@(Dfa v q s z d) = snd $ onePath ttdfa ttdfa [] (head z) s 
