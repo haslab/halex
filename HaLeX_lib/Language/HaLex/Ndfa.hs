@@ -37,6 +37,10 @@ module Language.HaLex.Ndfa (
              -- * Properties of 'Ndfa'
              , sizeNdfa
              , ndfadeadstates
+             , ndfasyncstates
+             , nodesAndEdgesNdfa
+             , nodesAndEdgesNoSyncNdfa
+             , cyclomaticNdfa
              -- * Properties of States
              , ndfaIsStDead
              , ndfaIsSyncState
@@ -295,11 +299,65 @@ ndfadeadstates :: Ord st
 ndfadeadstates (Ndfa v qs s z d) = filter (ndfaIsStDead d v z) qs
 
 
+-- | Compute the sync states of a 'Ndfa'
+--
+
+ndfasyncstates :: Ord st
+               => Ndfa st sy        -- ^ Automaton
+               -> [st]              -- ^ Dead States
+ndfasyncstates (Ndfa v qs s z d) = filter (ndfaIsSyncState d v z) qs
+
+
 -- | The size of an automaton is the number of its states.
 
 sizeNdfa :: Ndfa st sy        -- ^ Automaton
          -> Int               -- ^ Size
 sizeNdfa (Ndfa _ q _ _ _) = length q
+
+
+
+-- | Compute the number of states and transtions of a 'Ndfa'
+--  
+
+nodesAndEdgesNdfa ::  (Eq st , Ord st , Ord sy)
+                  => Ndfa st sy          -- ^ Automaton
+                  -> (Int , Int)        -- ^ (#States, #Transitions)
+nodesAndEdgesNdfa ndfa@(Ndfa _ q _ _ _) = (length q , length tt)
+    where tt      = transitionTableNdfa ndfa
+
+
+-- | Compute the number of states and transtions of a 'Dfa'
+--   It does not consider nodes (nor transitions to) dead states nor
+--   sync states.
+
+
+nodesAndEdgesNoSyncNdfa :: (Eq st , Ord st , Ord sy)
+                        => Ndfa st sy         -- ^ Automaton
+                        -> (Int , Int)        -- ^ (#States, #Transitions)
+nodesAndEdgesNoSyncNdfa ndfa@(Ndfa _ q _ _ _) = (length states , length tt')
+    where tt      = transitionTableNdfa ndfa
+          syncSts = ndfasyncstates ndfa
+          deadSts = ndfadeadstates ndfa
+          states  = filter (\ st -> not $((st `elem` syncSts) ||
+                                          (st `elem` deadSts))) q
+          tt'     = filter (\ (_ , _ , d) ->
+                       not $ (d `elem` syncSts) || (d `elem` deadSts)) tt
+
+
+-- | Compute the cyclomatic complexity of a 'Dfa'
+--   The Cyclomatic Complexity (CC) is given by
+--         cc = N - E + 2 * P
+--      where N is the number of nodes
+--            E is the number of edges
+--            P is tne number of connected components
+
+
+cyclomaticNdfa :: (Ord st , Ord sy)
+              => Ndfa st sy -> Int
+cyclomaticNdfa dfa = e - n + 2 * p 
+  where (n , e) =  nodesAndEdgesNoSyncNdfa dfa
+        p = 1                             
+
 
 
 
@@ -322,14 +380,6 @@ ndfaIsStDead d v z st = ndfareachedStatesFrom d v st `intersect` z == []
 -- | Checks whether a 'Ndfa' state is a sync state or not
 --
 
-{-
-ndfaIsSyncState :: Ord st => st -> [sy] -> [st] -> (st -> Maybe sy -> [st]) -> Bool
-ndfaIsSyncState st vs z d = (not (st `elem` z)) && (and qs)
-  where qs = [ [st] == (d st (Just v))
-               && (([st] == d st Nothing) || ([] == d st Nothing))
-             | v <- vs
-             ]
--}
 
 ndfaIsSyncState :: Ord st
                 => (st -> Maybe sy -> [st])     -- ^ Transition Function

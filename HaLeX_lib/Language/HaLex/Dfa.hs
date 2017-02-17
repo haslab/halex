@@ -45,7 +45,7 @@ module Language.HaLex.Dfa (
 	      , nodesAndEdgesDfa
 	      , nodesAndEdgesNoSyncDfa
               , dfadeadstates
-              , dfaSyncStates
+              , dfasyncstates
 	      , cyclomaticDfa
               -- * Properties of States
               , isStDead
@@ -424,10 +424,10 @@ beautifyDfa dfa = renameDfa dfa 1
 -- | Compute the sync states of a 'Dfa'
 --
 
-dfaSyncStates :: Eq st
+dfasyncstates :: Eq st
               => Dfa st sy      -- ^ Automaton
               -> [st]           -- ^ Dead states
-dfaSyncStates  (Dfa v q _ z d) = filter (isStSync d v z) q
+dfasyncstates  (Dfa v q _ z d) = filter (isStSync d v z) q
 
 
 -- | Compute the dead states of a 'Dfa'
@@ -466,7 +466,7 @@ nodesAndEdgesNoSyncDfa :: (Eq st , Ord st , Ord sy)
                        -> (Int , Int)        -- ^ (#States, #Transitions)
 nodesAndEdgesNoSyncDfa dfa@(Dfa _ q _ _ _) = (length states , length tt')
     where tt      = transitionTableDfa dfa
-          syncSts = dfaSyncStates dfa
+          syncSts = dfasyncstates dfa
 	  deadSts = dfadeadstates dfa
 	  states  = filter (\ st -> not $((st `elem` syncSts) ||
 	                                  (st `elem` deadSts))) q

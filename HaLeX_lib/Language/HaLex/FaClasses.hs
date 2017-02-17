@@ -36,6 +36,8 @@ class Fa fa st sy where
   minimize   :: fa st sy -> Dfa [[st]] sy
   reverseFa  :: fa st sy -> Ndfa st sy
   deadstates :: fa st sy -> [st]
+  syncstates :: fa st sy -> [st]
+  cyclomatic :: fa st sy -> Int
   sentences  :: fa st sy -> [[sy]]
   toHaskell' :: fa st sy -> String -> IO ()
   toGraph    :: fa st sy -> String -> String
@@ -57,6 +59,8 @@ instance (Show st , Show sy , Ord st , Ord sy) => Fa Dfa st sy where
   minimize   = minimizeDfa
   reverseFa  = reverseDfa
   deadstates = dfadeadstates
+  syncstates = dfasyncstates
+  cyclomatic = cyclomaticDfa
   sentences  = sentencesDfa
   toHaskell' = toHaskell
   toGraph    = dfa2graphviz
@@ -77,6 +81,8 @@ instance (Show st , Show sy , Ord st , Ord sy) => Fa Ndfa st sy where
   minimize   = minimizeNdfa
   reverseFa  = reverseNdfa
   deadstates = ndfadeadstates
+  syncstates = ndfasyncstates
+  cyclomatic = cyclomaticNdfa
   sentences  = sentencesNdfa
   toHaskell' = toHaskell
   toGraph    = ndfa2graphviz
