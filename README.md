@@ -4,7 +4,7 @@ HaLeX
 
   HaLeX: A Haskell Library to Model, 
                               Manipulate and 
-                              Animate Regular Languages
+                              Visualize Regular Languages
 
         http://www.di.uminho.pt/~jas/Research/HaLeX
 
@@ -12,10 +12,10 @@ Copyright João Saraiva
           Department of Computer Science,
           University of Minho, 
           Braga, Portugal
-          jas@di.uminho.pt
+          saraiva@di.uminho.pt
 
 
-Version: 1.2.3 (December, 2016)
+Version: 1.2.6 (January, 2017)
 
 
 1- What is HaleX

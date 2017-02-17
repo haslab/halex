@@ -1,6 +1,6 @@
 name:                HaLeX
-version:             1.2.3
-synopsis:            HaLeX enables modelling, manipulation and animation of regular languages
+version:             1.2.6
+synopsis:            HaLeX enables modelling, manipulation and visualization of regular languages
 description:         This library was developed in the context of a programming methodology course for
                      undergraduate students, and as a consequence, it was defined mainly for educational purposes.
                      Indeed, it provides a clear, efficient and concise way to define, to understand
@@ -11,7 +11,7 @@ category:            Data
 license:             PublicDomain
 license-file:        LICENSE
 author:              João Saraiva
-maintainer:          João Saraiva <jas@di.uminho.pt>
+maintainer:          João Saraiva <saraiva@di.uminho.pt>
 homepage:            http://www.di.uminho.pt/~jas/Research/HaLeX/HaLeX.html
 
 tested-with:         GHC==6.8.2
@@ -21,17 +21,18 @@ data-files:          README.md, INSTALL, paper/HaLeX.ps, example/README, example
 extra-source-files:  scripts/Make_Animation, scripts/faAnim.lefty, example/real, example/real_dfa.hs,
                      example/real_ndfa.hs, example/GenMDfa.hs
 Library
-        build-depends:          base>4 && <5, mtl
+        build-depends:          base>4 && <5, mtl, HUnit, QuickCheck
         extensions:             FlexibleContexts, FlexibleInstances, MultiParamTypeClasses
 
         ghc-options:          -Wall
 
         hs-source-dirs:         HaLeX_lib
-        Exposed-modules:        Language.HaLex.RegExpAsDiGraph, Language.HaLex.Ndfa, Language.HaLex.Dfa2MDfa, Language.HaLex.Minimize,
+        exposed-modules:        Language.HaLex.RegExpAsDiGraph, Language.HaLex.Ndfa, Language.HaLex.Dfa2MDfa, Language.HaLex.Minimize,
                                 Language.HaLex.Examples.Real, Language.HaLex.Examples.Robot, Language.HaLex.RegExpParser,
                                 Language.HaLex.FaClasses, Language.HaLex.RegExp, Language.HaLex.Dfa, Language.HaLex.DfaMonad,
                                 Language.HaLex.Fa2RegExp, Language.HaLex.Parser, Language.HaLex.RegExp2Fa, Language.HaLex.FaAsDiGraph,
-                                Language.HaLex.FaOperations, Language.HaLex.Util, Language.HaLex.Equivalence
+                                Language.HaLex.FaOperations, Language.HaLex.Util, Language.HaLex.Equivalence,
+                                Language.HaLex.Sentences, Language.HaLex.Test_HaLex, Language.HaLex.Test_HaLex_Quickcheck
 
 Executable halex
            main-is:             halex.hs

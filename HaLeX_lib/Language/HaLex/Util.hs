@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Language.HaLex.Edfa
+-- Module      :  Language.HaLex.Util
 -- Copyright   :  (c) Joãoo Saraiva 2001,2002,2003,2004,2005
 -- License     :  LGPL
 --

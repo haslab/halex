@@ -23,6 +23,9 @@ module Language.HaLex.Dfa (
               , dfaaccept
               , dfawalk
               -- * Transformation
+              , TableDfa
+              , ttAllSts
+              , ttAllDestSts
               , ttDfa2Dfa
               , dfa2tdfa
               -- * Transitions
@@ -39,7 +42,11 @@ module Language.HaLex.Dfa (
               , dfaIO
               -- * Properties of 'Dfa'
               , sizeDfa
+	      , nodesAndEdgesDfa
+	      , nodesAndEdgesNoSyncDfa
               , dfadeadstates
+              , dfaSyncStates
+	      , cyclomaticDfa
               -- * Properties of States
               , isStDead
               , isStSync
@@ -296,16 +303,35 @@ giveNumber (h:t) i | h == []   = giveNumber t i
 
 
 -- | Type of Table-based Deterministic Finite Automata.
---
+--                       v1 ,  v2 ,  ... , vn   vocabulary
+--            [ ( o1 , [ d  ,  d  ,  ... , d ]) 
+--            , ( o2 , [ d   , d  ,  ... , d ])
+--            ... ]
 
 type TableDfa st = [(st, [st])]
 
-stsDfa      = map fst
-stsRHS      = map snd
-allstsTable = concat . stsRHS
+
+-- | Compute all states in a transtion table defining a Dfa
+--   
+
+ttAllSts :: TableDfa st -> [st]
+ttAllSts = map fst
+
+ttDestinations :: TableDfa st -> [[st]]
+ttDestinations  = map snd
+
+-- | Compute all destinations states in a (transition) table
+--   It considers all states in the second element of the pair: the destion
+--   states.
+--   Usefull when the transition table is being constructed.
+
+ttAllDestSts :: Eq st
+            => TableDfa st   -- ^ Transition Table (maybe not totally defined)
+            -> [st]          -- ^ set of states in the table
+ttAllDestSts = nub . concat . ttDestinations
 
 
--- | Dfa to a Table-based Dfa
+-- | 'Dfa' to a Transition Table-based 'Dfa'
 --
 
 dfa2tdfa :: (Eq st, Ord sy)
@@ -323,7 +349,7 @@ dfa2tdfaStep :: Eq st
              -> TableDfa st       -- ^ Table-based Dfa
              -> TableDfa st       -- ^ Table-based Dfa with additional rows.
 dfa2tdfaStep delta alfabet tb = tb `union` (consRows delta newSts alfabet)
-  where newSts = ((nub . allstsTable) tb) <-> (stsDfa tb)
+  where newSts = (ttAllDestSts tb) <-> (ttAllSts tb)
 
 
 
@@ -334,6 +360,7 @@ consRows delta (q:qs) alfabet = (q , oneRow delta q alfabet) :
 
 oneRow :: (st -> sy -> st) -> st -> [sy] -> [st]
 oneRow delta st alfabet = map (delta st) alfabet
+
 
 -- | Renames a 'Dfa'.
 -- It renames a DFA in such a way that the renaming of two isomorphic DFA
@@ -392,6 +419,17 @@ beautifyDfa dfa = renameDfa dfa 1
 -----------------------------------------------------------------------------
 -- * Properties of 'Dfa'
 
+
+
+-- | Compute the sync states of a 'Dfa'
+--
+
+dfaSyncStates :: Eq st
+              => Dfa st sy      -- ^ Automaton
+              -> [st]           -- ^ Dead states
+dfaSyncStates  (Dfa v q _ z d) = filter (isStSync d v z) q
+
+
 -- | Compute the dead states of a 'Dfa'
 --
 
@@ -408,6 +446,47 @@ sizeDfa :: Dfa st sy -> Int
 sizeDfa (Dfa _ q _ _ _) = length q
 
 
+-- | Compute the number of states and transtions of a 'Dfa'
+--  
+
+nodesAndEdgesDfa ::  (Eq st , Ord st , Ord sy)
+                 => Dfa st sy          -- ^ Automaton
+                 -> (Int , Int)        -- ^ (#States, #Transitions)
+nodesAndEdgesDfa dfa@(Dfa _ q _ _ _) = (length q , length tt)
+    where tt      = transitionTableDfa dfa
+
+
+-- | Compute the number of states and transtions of a 'Dfa'
+--   It does not consider nodes (nor transitions to) dead states nor
+--   sync states.
+
+
+nodesAndEdgesNoSyncDfa :: (Eq st , Ord st , Ord sy)
+                       => Dfa st sy          -- ^ Automaton
+                       -> (Int , Int)        -- ^ (#States, #Transitions)
+nodesAndEdgesNoSyncDfa dfa@(Dfa _ q _ _ _) = (length states , length tt')
+    where tt      = transitionTableDfa dfa
+          syncSts = dfaSyncStates dfa
+	  deadSts = dfadeadstates dfa
+	  states  = filter (\ st -> not $((st `elem` syncSts) ||
+	                                  (st `elem` deadSts))) q
+          tt'     = filter (\ (_ , _ , d) ->
+	              not $ (d `elem` syncSts) || (d `elem` deadSts)) tt
+
+
+-- | Compute the cyclomatic complexity of a 'Dfa'
+--   The Cyclomatic Complexity (CC) is given by
+--         cc = N - E + 2 * P
+--      where N is the number of nodes
+--            E is the number of edges
+--            P is tne number of connected components
+
+
+cyclomaticDfa :: (Ord st , Ord sy)
+              => Dfa st sy -> Int
+cyclomaticDfa dfa = n - e + 2 * p 
+  where (n , e) =  nodesAndEdgesNoSyncDfa dfa
+        p = 1                             
 
 -----------------------------------------------------------------------------
 -- * Properties of States
