@@ -484,7 +484,7 @@ nodesAndEdgesNoSyncDfa dfa@(Dfa _ q _ _ _) = (length states , length tt')
 
 cyclomaticDfa :: (Ord st , Ord sy)
               => Dfa st sy -> Int
-cyclomaticDfa dfa = n - e + 2 * p 
+cyclomaticDfa dfa = e - n + 2 * p 
   where (n , e) =  nodesAndEdgesNoSyncDfa dfa
         p = 1                             
 
@@ -511,7 +511,7 @@ isStDead d v z st = reachedStatesFrom d v st `intersect` z == []
 -- | Checks whether a state is a sync state or not
 --
 --   A sync state is a state that has transitions to itself for all
---   symbols of the vocabulary
+--   symbols of the vocabulary ans it is not final/accepting state.
 
 
 isStSync :: Eq st
@@ -520,7 +520,7 @@ isStSync :: Eq st
          -> [st]                    -- ^ Set of Final States
          -> st                      -- ^ State
          -> Bool
-isStSync d vs z st = and qs
+isStSync d vs z st = (not (st `elem` z))  && (and qs)
   where qs = [ st == dfawalk d st [v]
              | v <- vs
              ]
