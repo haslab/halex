@@ -91,20 +91,20 @@ tographviz' ndfa@(Ndfa v q s z delta) name shape orientation
     showElemsListPerLine []    = ""
     showElemsListPerLine (h:t) = ((showString h) "\n ") ++ (showElemsListPerLine t) 
 
-    showStates qs = ["\"" ++ (showState q) ++ "\"" ++ 
-                     " [shape=" ++ shape ++" , label=\"" ++ (showState q) ++ "\" ,color=black];" 
+    showStates qs = [ (showState q) ++ 
+                     " [shape=" ++ shape ++" , label=" ++ (showState q) ++ " ,color=black];" 
                     | q <- qs 
                     , not (ndfaIsStDead delta v z q ) || deadSt
                     , not (ndfaIsSyncState delta v z q) || syncSt]
  
     showInitialStates ss = map showInitialState ss
 
-    showInitialState  s = "\"" ++ (showState s) 
-                          ++ "\" [shape=" ++ shape ++ " , label= \"" ++ (showState s) 
-                          ++ "\", color=green];\n " 
+    showInitialState  s = (showState s) 
+                          ++ " [shape=" ++ shape ++ " , label= " ++ (showState s) 
+                          ++ " , color=green];\n " 
 
 --    showFinalStates' :: Show a => [a] -> [String]
-    showFinalStates' zs = [ "\"" ++ (showState z) ++ "\" [shape=double" ++ shape ++" , color=red];" 
+    showFinalStates' zs = [ (showState z) ++ " [shape=double" ++ shape ++" , color=red];" 
                           | z <- zs ]
 
 
@@ -117,8 +117,8 @@ tographviz' ndfa@(Ndfa v q s z delta) name shape orientation
                                      mirroredInitialStates xs (n+1)
 
     createInitialArrows [] []         = " "
-    createInitialArrows (x:xs) (y:ys) = x ++ " -> \"" ++ (showState y) ++ 
-                                        "\" [color = green];\n" ++ 
+    createInitialArrows (x:xs) (y:ys) = x ++ " -> " ++ (showState y) ++ 
+                                        " [color = green];\n" ++ 
                                         createInitialArrows xs ys
 
 
