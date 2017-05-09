@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Language.HaLex.Ndfa
--- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005, 2016
+-- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005,2017
 -- License     :  LGPL
 --
 -- Maintainer  :  saraiva@di.uminho.pt

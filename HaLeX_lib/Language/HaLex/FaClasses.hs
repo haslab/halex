@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Language.HaLex.Dfa
--- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005
+-- Copyright   :  (c) João Saraiva 2001,2002,2003,2004,2005,2017
 -- License     :  LGPL
 --
 -- Maintainer  :  jas@di.uminho.pt
@@ -27,7 +27,7 @@ import Language.HaLex.Minimize
 import Language.HaLex.FaAsDiGraph
 
 
--- | Class of Finite automaton
+-- | Class of Finite Automaton
 
 class Fa fa st sy where
   accept     :: fa st sy -> [sy] -> Bool

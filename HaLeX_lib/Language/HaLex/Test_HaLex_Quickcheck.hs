@@ -92,7 +92,7 @@ exRegExp = sample (arbitrary :: Gen (RegExp Char))
 genDfaSentences :: (Ord st, Ord sy) => Dfa st sy -> Gen [sy]
 genDfaSentences dfa@(Dfa _ _ s z _) = genStrDfa tt syncStates s z
   where tt         = transitionTableDfa dfa
-        syncStates = dfaSyncStates dfa
+        syncStates = dfasyncstates dfa
 
 genStrDfa :: Eq st
           => [(st, sy, st)]       -- ^ Transition Table
@@ -104,10 +104,7 @@ genStrDfa tt syncSts st finals =
     do (_, c, dest) <- elements (filter (\(from,_,to) -> from == st
                                         && not (to `elem` syncSts)) tt)
        rst         <- genStrDfa tt syncSts dest finals
-       if (dest `elem` finals) then
-          return [c]
-       else
-          return (c : rst)
+       if (dest `elem` finals) then return [c] else return (c : rst)
 
 
 {-
@@ -128,10 +125,9 @@ genStrNdfa :: Eq st => [(st, Maybe sy, st)] -> st -> [st] -> (Gen [sy])
 genStrNdfa tt st fin =
     do (_, c, nxt) <- elements (filter (\(stt, _, _) -> stt == st) tt)
        rst         <- genStrNdfa tt nxt fin
-       if (nxt `elem` fin) then
-          return (maybeToList c)
-       else
-          return ((maybeToList c) ++ rst)
+       if (nxt `elem` fin)
+          then return (maybeToList c)
+          else return ((maybeToList c) ++ rst)
 
 
 maybeToList (Just x) = [x]
@@ -147,10 +143,9 @@ genWord :: [(Int,Maybe Char,Int)] -> [Int] -> Int -> Gen (String)
 genWord states fs st =
   do (char, next) <- elements (getValidPaths states st)
      gen          <- genWord states fs next
-     if (next ‘elem‘ fs) then
-        return (maybeToList char)
-     else
-        return ((maybeToList char) ++ gen)
+     if (next ‘elem‘ fs)
+        then return (maybeToList char)
+        else return ((maybeToList char) ++ gen)
 
 
 getValidPaths :: [(Int,Maybe Char,Int)] -> Int -> [(Maybe Char,Int)]
